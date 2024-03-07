@@ -34,9 +34,13 @@ class Album
     #[ORM\OneToMany(targetEntity: Song::class, mappedBy: 'album')]
     private Collection $songs;
 
+    #[ORM\ManyToMany(targetEntity: User::class, mappedBy: 'likes')]
+    private Collection $users;
+
     public function __construct()
     {
         $this->songs = new ArrayCollection();
+        $this->users = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -137,6 +141,33 @@ class Album
             if ($song->getAlbum() === $this) {
                 $song->setAlbum(null);
             }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getUsers(): Collection
+    {
+        return $this->users;
+    }
+
+    public function addUser(User $user): static
+    {
+        if (!$this->users->contains($user)) {
+            $this->users->add($user);
+            $user->addLike($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUser(User $user): static
+    {
+        if ($this->users->removeElement($user)) {
+            $user->removeLike($this);
         }
 
         return $this;

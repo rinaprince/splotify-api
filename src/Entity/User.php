@@ -25,8 +25,9 @@ class User
     #[ORM\Column(type: Types::ARRAY)]
     private array $roles = [];
 
-    #[ORM\OneToMany(targetEntity: Album::class, mappedBy: 'user')]
+    #[ORM\ManyToMany(targetEntity: Album::class, inversedBy: 'users')]
     private Collection $likes;
+
 
     public function __construct()
     {
@@ -93,7 +94,6 @@ class User
     {
         if (!$this->likes->contains($like)) {
             $this->likes->add($like);
-            $like->setUser($this);
         }
 
         return $this;
@@ -101,13 +101,9 @@ class User
 
     public function removeLike(Album $like): static
     {
-        if ($this->likes->removeElement($like)) {
-            // set the owning side to null (unless already changed)
-            if ($like->getUser() === $this) {
-                $like->setUser(null);
-            }
-        }
+        $this->likes->removeElement($like);
 
         return $this;
     }
+
 }
