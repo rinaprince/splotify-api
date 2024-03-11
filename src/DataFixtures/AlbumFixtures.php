@@ -22,6 +22,7 @@ class AlbumFixtures extends Fixture
             ;
 
             $manager->persist($album);
+            $this->addReference('album_' . ($i + 1), $album);
         }
 
         $manager->flush();
