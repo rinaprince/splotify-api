@@ -28,9 +28,6 @@ class Album
      #[ORM\ManyToOne(inversedBy: 'albums')]
     private ?Band $band = null;
 
-    #[ORM\ManyToOne(inversedBy: 'likes')]
-    private ?User $user = null;
-
     #[ORM\OneToMany(targetEntity: Song::class, mappedBy: 'album')]
     private Collection $songs;
 
@@ -100,18 +97,6 @@ class Album
     public function setBand(?Band $band): static
     {
         $this->band = $band;
-
-        return $this;
-    }
-
-    public function getUser(): ?User
-    {
-        return $this->user;
-    }
-
-    public function setUser(?User $user): static
-    {
-        $this->user = $user;
 
         return $this;
     }
