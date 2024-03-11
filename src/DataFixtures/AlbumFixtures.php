@@ -26,5 +26,4 @@ class AlbumFixtures extends Fixture
 
         $manager->flush();
     }
-    }
 }
