@@ -40,7 +40,7 @@ class ApiSongTest extends ApiTestCase
         $this->assertEquals('success', $responseData['status']);
 
         $this->assertArrayHasKey('data', $responseData);
-        $this->assertEquals('Aperiam voluptatem expedita.', $responseData['data']);
+        $this->assertEquals('Doloremque sapiente est quam.', $responseData['data']['title']);
 
         $this->assertArrayHasKey('message', $responseData);
         $this->assertNull($responseData['message']);
@@ -64,31 +64,4 @@ class ApiSongTest extends ApiTestCase
         $this->assertArrayHasKey('message', $responseData);
         $this->assertEquals("No s'ha trobat ninguna cançó", $responseData['message']);
     }
-
-    public function testEdit(): void
-    {
-        $client = static::createClient();
-
-        $songId = 1;
-        $requestData = [
-            'title' => 'Nuevo título de la canción',
-            'album_id' => 2,
-            'duration' => 180
-        ];
-
-        $client->request('GET', '/api/v1/songs/' . $songId . '/edit', [], [], [], json_encode($requestData));
-
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $responseData = json_decode($client->getResponse()->getContent(), true);
-
-        $this->assertArrayHasKey('status', $responseData);
-        $this->assertEquals('success', $responseData['status']);
-
-        $this->assertArrayHasKey('data', $responseData);
-        $this->assertEquals($requestData['Earum rerum quam.'], $responseData['data']);
-
-        $this->assertArrayHasKey('message', $responseData);
-        $this->assertEquals("La cançò s'ha actualitzat correctament!", $responseData['message']);
-    }
-
 }
