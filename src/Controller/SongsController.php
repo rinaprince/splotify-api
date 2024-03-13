@@ -18,16 +18,22 @@ class SongsController extends AbstractController
     public function index(SongRepository $songRepository): JsonResponse
     {
         $songs = $songRepository->findAll();
+        $titles = [];
+
+        foreach ($songs as $song) {
+            $titles[] = $song->getTitle();
+        }
+
         if ($songs == "" || $songs == null) {
             $songsJson = [
                 "status" => "fail",
-                "data" => $songs,
+                "data" => $titles,
                 "message" => "No hi ha cançons."
             ];
         } else {
             $songsJson = [
                 "status" => "success",
-                "data" => $songs,
+                "data" => $titles,
                 "message" => null
             ];
         }
@@ -41,14 +47,14 @@ class SongsController extends AbstractController
         if (!empty($songs)) {
             $songsJson = [
                 "status" => "success",
-                "data" => $songs,
+                "data" => $songs->getTitle(),
                 "message" => null
             ];
             $status = Response::HTTP_OK;
         } else {
             $songsJson = [
                 "status" => "error",
-                "data" => $songs,
+                "data" => $songs->getTitle(),
                 "message" => "No s'ha trobat ninguna cançò"
             ];
             $status = Response::HTTP_NOT_FOUND;
@@ -139,7 +145,7 @@ class SongsController extends AbstractController
 
             $response = [
                 "status" => "success",
-                "data" => $song,
+                "data" => $song->getTitle(),
                 "message" => "La cançò s'ha actualitzat correctament!."
             ];
 
@@ -148,7 +154,7 @@ class SongsController extends AbstractController
             $errorMessage = 'Error al editar la cançò: ' . $e->getMessage();
             $response = [
                 "status" => "error",
-                "data" => $song,
+                "data" => $song->getTitle(),
                 "message" => $errorMessage
             ];
             return new JsonResponse($response, Response::HTTP_INTERNAL_SERVER_ERROR);
