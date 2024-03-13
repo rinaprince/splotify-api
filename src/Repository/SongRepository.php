@@ -57,7 +57,7 @@ class SongRepository extends ServiceEntityRepository
     public function findByTextQuery(string $value): Query
     {
         return $this->createQueryBuilder('s')
-            ->andWhere('v.title LIKE :val')
+            ->andWhere('s.title LIKE :val')
             ->setParameter('val', "%$value%")
             ->orderBy('s.id', 'ASC')
             ->getQuery()
