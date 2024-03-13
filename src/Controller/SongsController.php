@@ -11,14 +11,29 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
+use Knp\Component\Pager\PaginatorInterface;
 
 #[Route('/api/v1/songs')]
 class SongsController extends AbstractController
 {
     #[Route('', name: 'app_api_songs', methods: ['GET'])]
-    public function index(SongRepository $songRepository): JsonResponse
+    public function index(Request $request, SongRepository $songRepository, PaginatorInterface $paginator): JsonResponse
     {
-        $songs = $songRepository->findAll();
+        $q = $request->query->get('q', '');
+
+        if (empty($q)) {
+            $query = $songRepository->findAllQuery();
+        } else {
+            $query = $songRepository->findByTextQuery($q);
+        }
+
+        $pagination = $paginator->paginate(
+            $query,
+            $request->query->getInt('page', 1),
+            15
+        );
+
+        $songs = $pagination->getItems();
         $titles = [];
 
         foreach ($songs as $song) {
@@ -56,7 +71,7 @@ class SongsController extends AbstractController
         else{
             $songsJson = [
                 "status" => "error",
-                "data" => $songs,
+                "data" => null,
                 "message" => "No s'ha pogut trobar la cançò"
             ];
             $status = Response::HTTP_NOT_FOUND;

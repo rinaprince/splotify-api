@@ -4,6 +4,7 @@ namespace App\Repository;
 
 use App\Entity\Song;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
@@ -45,4 +46,21 @@ class SongRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+    public function findAllQuery(): Query
+    {
+        return $this->createQueryBuilder('s')
+            ->orderBy('s.id', 'ASC')
+            ->getQuery()
+            ;
+    }
+
+    public function findByTextQuery(string $value): Query
+    {
+        return $this->createQueryBuilder('s')
+            ->andWhere('v.title LIKE :val')
+            ->setParameter('val', "%$value%")
+            ->orderBy('s.id', 'ASC')
+            ->getQuery()
+            ;
+    }
 }

@@ -62,6 +62,6 @@ class ApiSongTest extends ApiTestCase
         $this->assertNull($responseData['data']);
 
         $this->assertArrayHasKey('message', $responseData);
-        $this->assertEquals("No s'ha trobat ninguna cançó", $responseData['message']);
+        $this->assertEquals("No s'ha pogut trobar la cançò", $responseData['message']);
     }
 }
