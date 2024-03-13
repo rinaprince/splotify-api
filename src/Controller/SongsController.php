@@ -54,7 +54,7 @@ class SongsController extends AbstractController
         } else {
             $songsJson = [
                 "status" => "error",
-                "data" => $songs->getTitle(),
+                "data" => null,
                 "message" => "No s'ha trobat ninguna cançò"
             ];
             $status = Response::HTTP_NOT_FOUND;
@@ -66,7 +66,7 @@ class SongsController extends AbstractController
     function create(Request $request, EntityManagerInterface $e): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        if (!isset($data["id"]) || !isset($data["title"]) || !isset($data["album"]) || !isset($data["duration"])) {
+        if (!isset($data["id"]) || !isset($data["title"]) || !isset($data["album_id"]) || !isset($data["duration"])) {
             $errorMessage = "Falten dades per crear la cançò.";
             return new JsonResponse(["status" => "error", "message" => $errorMessage], Response::HTTP_BAD_REQUEST);
         }
@@ -75,7 +75,7 @@ class SongsController extends AbstractController
             $song = new Song();
             $song->setId($data["id"]);
             $song->setTitle($data["title"]);
-            $song->setAlbum($data["album"]);
+            $song->setAlbum($data["album_id"]);
             $song->setDuration($data["duration"]);
 
             $e->persist($song);
@@ -100,7 +100,7 @@ class SongsController extends AbstractController
         return new JsonResponse($responseData, $statusCode);
     }
 
-    #[Route('/{id}/delete', name: 'app_api_songs_delete', methods: ['DELETE'])]
+    #[Route('/{id}/delete', name: 'app_api_songs_delete', methods: ['POST'])]
     public function delete(Song $song, EntityManagerInterface $entityManager): JsonResponse
     {
 
@@ -118,14 +118,14 @@ class SongsController extends AbstractController
         } catch (\Exception $e) {
             $response = [
                 "status" => "error",
-                "data" => $song,
+                "data" => null,
                 "message" => 'Error al borrar una cançò: ' . $e->getMessage()
             ];
             return new JsonResponse($response, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    #[Route('/{id}/edit', name: 'app_api_songs_edit', methods: ['PUT'])]
+    #[Route('/{id}/edit', name: 'app_api_songs_edit', methods: ['GET'])]
     public function edit(Song $song, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -134,8 +134,8 @@ class SongsController extends AbstractController
             if (isset($data["title"])) {
                 $song->setTitle($data["title"]);
             }
-            if (isset($data["album"])) {
-                $song->setAlbum($data["album"]);
+            if (isset($data["album_id"])) {
+                $song->setAlbum($data["album_id"]);
             }
             if (isset($data["duration"])) {
                 $song->setDuration($data["duration"]);
@@ -154,7 +154,7 @@ class SongsController extends AbstractController
             $errorMessage = 'Error al editar la cançò: ' . $e->getMessage();
             $response = [
                 "status" => "error",
-                "data" => $song->getTitle(),
+                "data" => null,
                 "message" => $errorMessage
             ];
             return new JsonResponse($response, Response::HTTP_INTERNAL_SERVER_ERROR);
