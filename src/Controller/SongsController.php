@@ -13,7 +13,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Knp\Component\Pager\PaginatorInterface;
 
-#[Route('/api/v1/songs')]
+#[Route('/songs')]
 class SongsController extends AbstractController
 {
     #[Route('', name: 'app_api_songs', methods: ['GET'])]
@@ -36,43 +36,46 @@ class SongsController extends AbstractController
         $songs = $pagination->getItems();
         $titles = [];
 
-        foreach ($songs as $song) {
-            $titles[] = $song->getTitle();
-        }
 
-        if ($songs == "" || $songs == null) {
+        if (empty($songs)) {
             $songsJson = [
-                "status" => "fail",
-                "data" => $titles,
-                "message" => "No hi ha cançons."
+                "response" => [
+                    "status" => "fail",
+                    "data" => null,
+                    "message" => "No hi ha cançons."
+                ]
             ];
         } else {
             $songsJson = [
-                "status" => "success",
-                "data" => $titles,
-                "message" => null
-            ];
+                "response" => [
+                    "status" => "success",
+                    "data" => $songs,
+                    "message" => null
+                ]];
         }
 
         return new JsonResponse($songsJson, Response::HTTP_OK);
     }
 
     #[Route('/{id}', name: 'app_api_songs_show', methods: ['GET'])]
-    public function show(?Song $songs): JsonResponse
+    public function show(?Song $song): JsonResponse
     {
-        if(!empty($songs)){
+        if (!empty($song)) {
             $songsJson = [
-                "status" => "succes",
-                "data" => $songs->getTitle(),
-                "message" => null
+                "response" => [
+                    "status" => "success",
+                    "data" => $song,
+                    "message" => null
+                ]
             ];
             $status = Response::HTTP_OK;
-        }
-        else{
+        } else {
             $songsJson = [
-                "status" => "error",
-                "data" => null,
-                "message" => "No s'ha pogut trobar la cançò"
+                "response" => [
+                    "status" => "error",
+                    "data" => null,
+                    "message" => "No s'ha pogut trobar la cançò"
+                ]
             ];
             $status = Response::HTTP_NOT_FOUND;
         }

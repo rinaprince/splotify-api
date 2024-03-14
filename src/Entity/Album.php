@@ -9,7 +9,7 @@ use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: AlbumRepository::class)]
-class Album
+class Album implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -156,5 +156,13 @@ class Album
         }
 
         return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function jsonSerialize(): mixed
+    {
+        return ["id" => $this->getId()];
     }
 }

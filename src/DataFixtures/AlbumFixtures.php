@@ -6,13 +6,16 @@ use App\Entity\Album;
 use App\Entity\Song;
 use App\Entity\User;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
 
-class AlbumFixtures extends Fixture
+class AlbumFixtures extends Fixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {
+        $albums = [];
+
         $faker = Factory::create();
 
         //Generar àlbums
@@ -38,12 +41,20 @@ class AlbumFixtures extends Fixture
 
                 $manager->persist($song);
             }
+
+            $albums[] = $album;
         }
 
+       // $manager->flush();
+
         // Asignar àlbums a users
-        $admin = $manager->getRepository(User::class)->findOneBy(['username' => 'admin']);
-        $user = $manager->getRepository(User::class)->findOneBy(['username' => 'user']);
-        $albums = $manager->getRepository(Album::class)->findAll();
+        //$admin = $manager->getRepository(User::class)->findOneBy(['username' => 'admin']);
+        //$user = $manager->getRepository(User::class)->findOneBy(['username' => 'user']);
+
+        $admin = $this->getReference('usuari_admin');
+        $user = $this->getReference('usuari_normal');
+
+        //$albums = $manager->getRepository(Album::class)->findAll();
 
         foreach ($albums as $album) {
             if (rand(0, 1)) {
@@ -53,7 +64,15 @@ class AlbumFixtures extends Fixture
             }
         }
 
+        $manager->persist($admin);
+        $manager->persist($user);
+
 
         $manager->flush();
+    }
+
+    public function getDependencies()
+    {
+        return [UserFixtures::class];
     }
 }

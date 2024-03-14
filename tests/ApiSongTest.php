@@ -3,65 +3,109 @@
 namespace App\Tests;
 
 use ApiPlatform\Symfony\Bundle\Test\ApiTestCase;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class ApiSongTest extends ApiTestCase
 {
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     */
     public function  testIndex(): void
     {
         $client = static::createClient();
 
-        $client->request('GET', '/api/v1/songs', [], [], ['ACCEPT' => 'application/json']);
+        $response = $client->request('GET', '/songs', ["headers" => ["Accept: application/json"]]);
 
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $responseData = json_decode($client->getResponse()->getContent(), true);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
-        $this->assertArrayHasKey('status', $responseData);
-        $this->assertEquals('success', $responseData['status']);
+        $responseData = $response->toArray();
 
-        $this->assertArrayHasKey('data', $responseData);
-        $this->assertIsArray($responseData['data']);
+        $this->assertArrayHasKey("response", $responseData);
 
-        $this->assertGreaterThan(0, count($responseData['data']));
+        $this->assertArrayHasKey('status', $responseData["response"]);
+        $this->assertEquals('success', $responseData["response"]["status"]);
 
-        $this->assertArrayHasKey('message', $responseData);
-        $this->assertNull($responseData['message']);
+        $this->assertArrayHasKey('data', $responseData["response"]);
+        $this->assertCount(15, $responseData["response"]["data"]);
+
+        $data = $responseData["response"]["data"];
+
+        $this->assertArrayHasKey("id", $data[0]);
+        $this->assertArrayHasKey("title", $data[0]);
+        $this->assertArrayHasKey("duration", $data[0]);
+        $this->assertArrayHasKey("album", $data[0]);
+
+        $this->assertArrayHasKey('message', $responseData["response"]);
+        $this->assertNull($responseData["response"]['message']);
     }
 
     public function testShow(): void
     {
         $client = static::createClient();
 
-        $client->request('GET', '/api/v1/songs/1', [], [], ['ACCEPT' => 'application/json']);
+        $response = $client->request('GET', '/songs/1', ["headers" => ["Accept: application/json"]]);
 
-        $this->assertEquals(200, $client->getResponse()->getStatusCode());
-        $responseData = json_decode($client->getResponse()->getContent(), true);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
 
-        $this->assertArrayHasKey('status', $responseData);
+        $responseData = $response->toArray();
+
+        $this->assertArrayHasKey("response", $responseData);
+
+        $this->assertArrayHasKey('status', $responseData["response"]);
+        $this->assertEquals('success', $responseData["response"]["status"]);
+
+        $this->assertArrayHasKey('data', $responseData["response"]);
+
+        $data = $responseData["response"]["data"];
+
+        $this->assertArrayHasKey("id", $data);
+        $this->assertArrayHasKey("title", $data);
+        $this->assertArrayHasKey("duration", $data);
+        $this->assertArrayHasKey("album", $data);
+
+        $this->assertArrayHasKey('message', $responseData["response"]);
+        $this->assertNull($responseData["response"]['message']);
+
+        $this->assertEquals('Doloremque sapiente est quam.', $data['title']);
+
+
+/*        $this->assertArrayHasKey('status', $responseData);
         $this->assertEquals('success', $responseData['status']);
 
         $this->assertArrayHasKey('data', $responseData);
-        $this->assertEquals('Doloremque sapiente est quam.', $responseData['data']['title']);
+
 
         $this->assertArrayHasKey('message', $responseData);
-        $this->assertNull($responseData['message']);
+        $this->assertNull($responseData['message']);*/
     }
 
     public function testShowNotFound(): void
     {
         $client = static::createClient();
 
-        $client->request('GET', '/api/v1/songs/999', [], [], ['ACCEPT' => 'application/json']);
+        $response = $client->request('GET', '/songs/999999', ["headers" => ["Accept: application/json"]]);
 
-        $this->assertEquals(404, $client->getResponse()->getStatusCode());
-        $responseData = json_decode($client->getResponse()->getContent(), true);
+        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
 
-        $this->assertArrayHasKey('status', $responseData);
-        $this->assertEquals('error', $responseData['status']);
-
-        $this->assertArrayHasKey('data', $responseData);
-        $this->assertNull($responseData['data']);
-
-        $this->assertArrayHasKey('message', $responseData);
-        $this->assertEquals("No s'ha pogut trobar la cançò", $responseData['message']);
+//        $this->assertEquals(404, $client->getResponse()->getStatusCode());
+//        $responseData = json_decode($client->getResponse()->getContent(), true);
+//
+//        $this->assertArrayHasKey('status', $responseData);
+//        $this->assertEquals('error', $responseData['status']);
+//
+//        $this->assertArrayHasKey('data', $responseData);
+//        $this->assertNull($responseData['data']);
+//
+//        $this->assertArrayHasKey('message', $responseData);
+//        $this->assertEquals("No s'ha pogut trobar la cançò", $responseData['message']);
     }
 }

@@ -8,7 +8,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: SongRepository::class)]
-class Song
+class Song implements \JsonSerializable
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -21,7 +21,9 @@ class Song
     #[ORM\Column]
     private ?int $duration = null;
 
+
     #[ORM\ManyToOne(inversedBy: 'songs')]
+    #[ORM\JoinColumn(nullable: false)]
     private ?Album $album = null;
 
     public function __construct()
@@ -77,4 +79,14 @@ class Song
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
+    public function jsonSerialize(): mixed
+    {
+        return ["id" => $this->getId(),
+            "title"=> $this->getTitle(),
+            "duration" => $this->getDuration(),
+            "album" => $this->getAlbum()];
+    }
 }

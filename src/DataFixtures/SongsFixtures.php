@@ -4,10 +4,11 @@ namespace App\DataFixtures;
 
 use App\Entity\Song;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Faker\Factory;
 
-class SongsFixtures extends Fixture
+class SongsFixtures extends Fixture implements DependentFixtureInterface
 {
     public function load(ObjectManager $manager): void
     {
@@ -28,5 +29,11 @@ class SongsFixtures extends Fixture
         }
 
         $manager->flush();
+    }
+
+    public function getDependencies()
+    {
+        // TODO: Implement getDependencies() method.
+        return [AlbumFixtures::class];
     }
 }
