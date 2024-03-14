@@ -6,6 +6,7 @@ use App\Repository\SongRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: SongRepository::class)]
 class Song implements \JsonSerializable
@@ -19,6 +20,12 @@ class Song implements \JsonSerializable
     private ?string $title = null;
 
     #[ORM\Column]
+    #[Assert\Range(
+        notInRangeMessage: 'You must be between {{ min }}cm and {{ max }}cm tall to enter',
+        min: 0,
+        max: 600,
+    )]
+    #[Assert\Type('integer')]
     private ?int $duration = null;
 
 

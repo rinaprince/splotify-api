@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Entity\Album;
+use App\Repository\AlbumRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\Song;
 use App\Repository\SongRepository;
@@ -12,6 +13,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 use Knp\Component\Pager\PaginatorInterface;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 #[Route('/songs')]
 class SongsController extends AbstractController
@@ -82,31 +84,37 @@ class SongsController extends AbstractController
         return new JsonResponse($songsJson, $status);
     }
 
-    #[Route('/new', name: 'api_songs_new', methods: ['POST'])]
-    function create(Request $request, EntityManagerInterface $e): JsonResponse
+    #[Route('', name: 'api_songs_new', methods: ['POST'])]
+    function create(Request $request, EntityManagerInterface $e, AlbumRepository $albumRepository, ValidatorInterface $validator): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
 
-        if (!isset($data["id"], $data["title"], $data["album_id"], $data["duration"])) {
+        $data = $request->toArray();
+
+        if (!isset($data["title"], $data["album"], $data["duration"])) {
             return new JsonResponse(["status" => "error", "message" => "Falten dades per crear la cançò."], Response::HTTP_BAD_REQUEST);
         }
 
         try {
-            $album = $e->find(Album::class, $data["album_id"]);
-
+            $album = $albumRepository->find($data["album"]);
+            // TODO: si album es null caldra respondre amb 400
             $song = new Song();
-            $song->setId($data["id"]);
             $song->setTitle($data["title"]);
             $song->setAlbum($album);
             $song->setDuration($data["duration"]);
 
+            $violations = $validator->validate($song);
+
+            if (count($violations)>0)
+                throw new \Exception("not type");
+
             $e->persist($song);
             $e->flush();
 
-            $responseData = [
-                "status" => "success",
-                "data" => $data,
-                "message" => "La cançò s'ha creat correctament!."
+            $responseData = [ "response" => [
+                    "status" => "success",
+                    "data" => $data,
+                    "message" => "La cançò s'ha creat correctament!."
+                ]
             ];
             $statusCode = Response::HTTP_CREATED;
         } catch (\Exception $e) {

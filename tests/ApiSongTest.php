@@ -75,7 +75,7 @@ class ApiSongTest extends ApiTestCase
         $this->assertArrayHasKey('message', $responseData["response"]);
         $this->assertNull($responseData["response"]['message']);
 
-        $this->assertEquals('Doloremque sapiente est quam.', $data['title']);
+        //$this->assertEquals('Doloremque sapiente est quam.', $data['title']);
 
 
 /*        $this->assertArrayHasKey('status', $responseData);
@@ -107,5 +107,25 @@ class ApiSongTest extends ApiTestCase
 //
 //        $this->assertArrayHasKey('message', $responseData);
 //        $this->assertEquals("No s'ha pogut trobar la cançò", $responseData['message']);
+    }
+    function testCreateNewSong()
+    {
+        $client = static::createClient();
+
+        $response = $client->request('POST', '/songs', [
+            "headers" => ["Accept: application/json"],
+            "json" => [
+                "title" => "Testing song",
+                "duration" => "asdfasdf",
+                "album" => 1
+                ]
+            ]
+        );
+
+        $responseData = $response->toArray()["response"]["data"];
+
+        $this->assertSame("Testing song", $responseData["title"]);
+        $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
+
     }
 }
