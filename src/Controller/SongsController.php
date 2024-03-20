@@ -104,8 +104,7 @@ class SongsController extends AbstractController
                     "message" => "No s'ha trobat l'àlbum."
                 ]
                 ];
-                $status = Response::HTTP_BAD_REQUEST;
-                return new JsonResponse($albumJson, $status);
+                return new JsonResponse($albumJson, Response::HTTP_BAD_REQUEST);
             }
 
             $song = new Song();
@@ -115,8 +114,20 @@ class SongsController extends AbstractController
 
             $violations = $validator->validate($song);
 
-            if (count($violations) > 0)
-                throw new \Exception("not type");
+            if (count($violations) > 0) {
+                $errors = [];
+                foreach ($violations as $violation) {
+                    $errors[] = $violation->getMessage();
+                }
+
+                $songsJson = ["response" => [
+                    "status" => "error",
+                    "data" => $data,
+                    "message" => implode(', ', $errors)
+                ]
+                ];
+                return new JsonResponse($songsJson, Response::HTTP_BAD_REQUEST);
+            }
 
             $e->persist($song);
             $e->flush();
@@ -128,6 +139,7 @@ class SongsController extends AbstractController
             ]
             ];
             $statusCode = Response::HTTP_CREATED;
+            return new JsonResponse($responseData, $statusCode);
         } catch (\Exception $e) {
             $responseData = [ "response" => [
                 "status" => "error",
@@ -136,9 +148,8 @@ class SongsController extends AbstractController
             ]
             ];
             $statusCode = Response::HTTP_BAD_REQUEST;
+            return new JsonResponse($responseData, $statusCode);
         }
-
-        return new JsonResponse($responseData, $statusCode);
     }
 
     #[Route('/{id}', name: 'app_api_songs_delete', methods: ['DELETE'])]
