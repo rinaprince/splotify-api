@@ -100,7 +100,7 @@ class SongsController extends AbstractController
             if ($album === null) {
                 $albumJson = ["response" => [
                     "status" => "error",
-                    "data" => $data,
+                    "data" => null,
                     "message" => "No s'ha trobat l'àlbum."
                 ]
                 ];
@@ -122,7 +122,7 @@ class SongsController extends AbstractController
 
                 $songsJson = ["response" => [
                     "status" => "error",
-                    "data" => $data,
+                    "data" => null,
                     "message" => implode(', ', $errors)
                 ]
                 ];
@@ -143,7 +143,7 @@ class SongsController extends AbstractController
         } catch (\Exception $e) {
             $responseData = [ "response" => [
                 "status" => "error",
-                "data" => $data,
+                "data" => null,
                 "message" => 'Error al crear la cançò: ' . $e->getMessage()
             ]
             ];

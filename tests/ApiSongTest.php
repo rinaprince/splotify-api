@@ -124,7 +124,6 @@ class ApiSongTest extends ApiTestCase
         );
 
         $responseData = $response->toArray()["response"]["data"];
-
         $this->assertSame("Eligendi et ut.", $responseData["title"]);
         $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
 
