@@ -85,64 +85,60 @@ class SongsController extends AbstractController
     }
 
     #[Route('', name: 'api_songs_new', methods: ['POST'])]
-    function create(Request $request, EntityManagerInterface $e, AlbumRepository $albumRepository, ValidatorInterface $validator): JsonResponse
+    function create(Request $request, EntityManagerInterface $entityManager, AlbumRepository $albumRepository, ValidatorInterface $validator): JsonResponse
     {
-
-        $data = $request->toArray();
-
         try {
+            $data = $request->toArray();
+
+            // Comprovar si l'àlbum existeix
             $album = $albumRepository->find($data["album"]);
-            // TODO: si album es null caldra respondre amb 400
             if ($album === null) {
                 $albumJson = ["response" => [
                     "status" => "error",
                     "data" => null,
                     "message" => "No s'ha trobat l'àlbum."
-                ]
-                ];
+                ]];
                 return new JsonResponse($albumJson, Response::HTTP_BAD_REQUEST);
             }
 
+            // Crear una cançó
             $song = new Song();
             $song->setTitle($data["title"]);
             $song->setAlbum($album);
             $song->setDuration($data["duration"]);
 
+            // Validar la cançó
             $violations = $validator->validate($song);
-
             if (count($violations) > 0) {
                 $errors = [];
                 foreach ($violations as $violation) {
                     $errors[] = $violation->getMessage();
                 }
-
                 $songsJson = ["response" => [
                     "status" => "error",
                     "data" => null,
                     "message" => implode(', ', $errors)
-                ]
-                ];
+                ]];
                 return new JsonResponse($songsJson, Response::HTTP_BAD_REQUEST);
             }
 
-            $e->persist($song);
-            $e->flush();
+            $entityManager->persist($song);
+            $entityManager->persist($album);
+            $entityManager->flush();
 
             $responseData = ["response" => [
                 "status" => "success",
                 "data" => $data,
-                "message" => "La cançò s'ha creat correctament!."
-            ]
-            ];
+                "message" => "La cançó s'ha creat correctament!"
+            ]];
             $statusCode = Response::HTTP_CREATED;
             return new JsonResponse($responseData, $statusCode);
         } catch (\Exception $e) {
-            $responseData = [ "response" => [
+            $responseData = ["response" => [
                 "status" => "error",
                 "data" => null,
-                "message" => 'Error al crear la cançò: ' . $e->getMessage()
-            ]
-            ];
+                "message" => 'Error en crear la cançó: ' . $e->getMessage()
+            ]];
             $statusCode = Response::HTTP_BAD_REQUEST;
             return new JsonResponse($responseData, $statusCode);
         }

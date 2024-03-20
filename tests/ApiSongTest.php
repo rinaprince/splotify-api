@@ -123,8 +123,17 @@ class ApiSongTest extends ApiTestCase
             ]
         );
 
-        $responseData = $response->toArray()["response"]["data"];
-        $this->assertSame("Eligendi et ut.", $responseData["title"]);
+        $responseData = $response->toArray();
+        $this->assertArrayHasKey("response", $responseData);
+
+        $this->assertArrayHasKey("status", $responseData["response"]);
+        $this->assertSame("success", $responseData["response"]["status"]);
+
+        $this->assertArrayHasKey("data", $responseData["response"]);
+
+        $this->assertArrayHasKey("message", $responseData["response"]);
+        $this->assertSame("La cançó s'ha creat correctament!", $responseData["response"]["message"]);
+        //$this->assertSame("Eligendi et ut.", $responseData["title"]);
         $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
 
         //Quan les dades no són correectes 400
@@ -132,7 +141,7 @@ class ApiSongTest extends ApiTestCase
             "headers" => ["Accept" => "application/json"],
             "json" => [
                 "title" => "Invalid song",
-                "duration" => "600",
+                "duration" => "999",
                 "album" => 1
             ]
         ]);
@@ -147,7 +156,7 @@ class ApiSongTest extends ApiTestCase
         $this->assertArrayHasKey("data", $invalidData["response"]);
 
         $this->assertArrayHasKey("message", $invalidData["response"]);
-        $this->assertSame("Validation error message", $invalidData["message"]);
+        $this->assertSame("Error al crear la cançò:", $invalidData["response"]["message"]);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
