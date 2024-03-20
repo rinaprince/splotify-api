@@ -90,10 +90,6 @@ class SongsController extends AbstractController
 
         $data = $request->toArray();
 
-        if (!isset($data["title"], $data["album"], $data["duration"])) {
-            return new JsonResponse(["status" => "error", "message" => "Falten dades per crear la cançò."], Response::HTTP_BAD_REQUEST);
-        }
-
         try {
             $album = $albumRepository->find($data["album"]);
             // TODO: si album es null caldra respondre amb 400

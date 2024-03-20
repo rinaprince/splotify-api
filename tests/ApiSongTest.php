@@ -137,8 +137,18 @@ class ApiSongTest extends ApiTestCase
             ]
         ]);
 
-        $invalidData = $invalidResponse->toArray()["response"]["data"];
-        $this->assertSame("Invalid song", $invalidData["title"]);
+        $invalidData = $invalidResponse->toArray();
+
+        $this->assertArrayHasKey("response", $invalidData);
+
+        $this->assertArrayHasKey("status", $invalidData["response"]);
+        $this->assertSame("error", $invalidData["response"]["status"]);
+
+        $this->assertArrayHasKey("data", $invalidData["response"]);
+
+        $this->assertArrayHasKey("message", $invalidData["response"]);
+        $this->assertSame("Validation error message", $invalidData["message"]);
+
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
 
