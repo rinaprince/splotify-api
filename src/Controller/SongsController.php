@@ -97,6 +97,17 @@ class SongsController extends AbstractController
         try {
             $album = $albumRepository->find($data["album"]);
             // TODO: si album es null caldra respondre amb 400
+            if ($album === null) {
+                $albumJson = ["response" => [
+                    "status" => "error",
+                    "data" => $data,
+                    "message" => "No s'ha trobat l'àlbum."
+                ]
+                ];
+                $status = Response::HTTP_BAD_REQUEST;
+                return new JsonResponse($albumJson, $status);
+            }
+
             $song = new Song();
             $song->setTitle($data["title"]);
             $song->setAlbum($album);
@@ -104,24 +115,25 @@ class SongsController extends AbstractController
 
             $violations = $validator->validate($song);
 
-            if (count($violations)>0)
+            if (count($violations) > 0)
                 throw new \Exception("not type");
 
             $e->persist($song);
             $e->flush();
 
-            $responseData = [ "response" => [
-                    "status" => "success",
-                    "data" => $data,
-                    "message" => "La cançò s'ha creat correctament!."
-                ]
+            $responseData = ["response" => [
+                "status" => "success",
+                "data" => $data,
+                "message" => "La cançò s'ha creat correctament!."
+            ]
             ];
             $statusCode = Response::HTTP_CREATED;
         } catch (\Exception $e) {
-            $responseData = [
+            $responseData = [ "response" => [
                 "status" => "error",
                 "data" => $data,
                 "message" => 'Error al crear la cançò: ' . $e->getMessage()
+            ]
             ];
             $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
         }
@@ -129,7 +141,7 @@ class SongsController extends AbstractController
         return new JsonResponse($responseData, $statusCode);
     }
 
-    #[Route('/{id}/delete', name: 'app_api_songs_delete', methods: ['POST'])]
+    #[Route('/{id}', name: 'app_api_songs_delete', methods: ['DELETE'])]
     public function delete(Song $song, EntityManagerInterface $entityManager): JsonResponse
     {
 
@@ -137,24 +149,26 @@ class SongsController extends AbstractController
             $entityManager->remove($song);
             $entityManager->flush();
 
-            $response = [
+            $response = [ "response" => [
                 "status" => "success",
                 "data" => $song,
                 "message" => "La cançò s'ha eliminat!"
+                ]
             ];
 
             return new JsonResponse($response, Response::HTTP_OK);
         } catch (\Exception $e) {
-            $response = [
+            $response = [ "response" => [
                 "status" => "error",
                 "data" => null,
                 "message" => 'Error al borrar una cançò: ' . $e->getMessage()
+                ]
             ];
             return new JsonResponse($response, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
-    #[Route('/{id}/edit', name: 'app_api_songs_edit', methods: ['PUT'])]
+    #[Route('/{id}', name: 'app_api_songs_edit', methods: ['PUT'])]
     public function edit(Song $song, Request $request, EntityManagerInterface $entityManager): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -173,7 +187,7 @@ class SongsController extends AbstractController
 
             $entityManager->flush();
 
-            $response = [
+            $response = [ "response" => [
                 "status" => "success",
                 "data" => [
                     "id" => $song->getId(),
@@ -182,14 +196,16 @@ class SongsController extends AbstractController
                     "duration" => $song->getDuration()
                 ],
                 "message" => "La cançò s'ha actualitzat correctament!."
+                ]
             ];
 
             return new JsonResponse($response, Response::HTTP_OK);
         } catch (\Exception $e) {
-            $response = [
+            $response = [ "response" => [
                 "status" => "error",
                 "data" => null,
                 "message" => 'Error al editar la cançò: ' . $e->getMessage()
+                ]
             ];
             return new JsonResponse($response, Response::HTTP_INTERNAL_SERVER_ERROR);
         }
