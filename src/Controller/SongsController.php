@@ -135,7 +135,7 @@ class SongsController extends AbstractController
                 "message" => 'Error al crear la cançò: ' . $e->getMessage()
             ]
             ];
-            $statusCode = Response::HTTP_INTERNAL_SERVER_ERROR;
+            $statusCode = Response::HTTP_BAD_REQUEST;
         }
 
         return new JsonResponse($responseData, $statusCode);

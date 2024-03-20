@@ -125,7 +125,7 @@ class ApiSongTest extends ApiTestCase
 
         $responseData = $response->toArray()["response"]["data"];
 
-        $this->assertSame("Testing song", $responseData["title"]);
+        $this->assertSame("Eligendi et ut.", $responseData["title"]);
         $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
 
         //Quan les dades no són correectes 400
@@ -133,14 +133,14 @@ class ApiSongTest extends ApiTestCase
             "headers" => ["Accept" => "application/json"],
             "json" => [
                 "title" => "Invalid song",
-                "duration" => "asdfasdf",
+                "duration" => "600",
                 "album" => 1
             ]
         ]);
 
         $invalidData = $invalidResponse->toArray()["response"]["data"];
-        $this->assertSame("Error al crear la cançò:", $invalidData["message"]);
-        $this->assertResponseStatusCodeSame(Response::HTTP_INTERNAL_SERVER_ERROR);
+        $this->assertSame("Invalid song", $invalidData["title"]);
+        $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
 
 
