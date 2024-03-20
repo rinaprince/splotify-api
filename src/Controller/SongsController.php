@@ -155,7 +155,7 @@ class SongsController extends AbstractController
             $response = [ "response" => [
                 "status" => "success",
                 "data" => $song,
-                "message" => "La cançò s'ha eliminat!"
+                "message" => "La cançó s'ha eliminat!"
                 ]
             ];
 
@@ -181,13 +181,15 @@ class SongsController extends AbstractController
                 $song->setTitle($data["title"]);
             }
             if (isset($data["album_id"])) {
-                $album = $entityManager->find(Album::class, $data["album_id"]);
+                $album = $entityManager->find(Album::class, $data["album"]);
                 $song->setAlbum($album);
             }
             if (isset($data["duration"])) {
                 $song->setDuration($data["duration"]);
             }
 
+            $entityManager->persist($song);
+            $entityManager->persist($album);
             $entityManager->flush();
 
             $response = [ "response" => [
@@ -195,7 +197,7 @@ class SongsController extends AbstractController
                 "data" => [
                     "id" => $song->getId(),
                     "title" => $song->getTitle(),
-                    "album_id" => $song->getAlbum()->getId(),
+                    "album" => $song->getAlbum()->getId(),
                     "duration" => $song->getDuration()
                 ],
                 "message" => "La cançò s'ha actualitzat correctament!."
@@ -207,7 +209,7 @@ class SongsController extends AbstractController
             $response = [ "response" => [
                 "status" => "error",
                 "data" => null,
-                "message" => 'Error al editar la cançò: ' . $e->getMessage()
+                "message" => "Error al editar la cançò: " . $e->getMessage()
                 ]
             ];
             return new JsonResponse($response, Response::HTTP_INTERNAL_SERVER_ERROR);

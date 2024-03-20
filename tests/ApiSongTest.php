@@ -108,7 +108,7 @@ class ApiSongTest extends ApiTestCase
 //        $this->assertArrayHasKey('message', $responseData);
 //        $this->assertEquals("No s'ha pogut trobar la cançò", $responseData['message']);
     }
-    function testCreateNewSong()
+    function testCreateNewSong() : void
     {
         $client = static::createClient();
 
@@ -161,5 +161,81 @@ class ApiSongTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
 
+    public function testEditSong() :void
+    {
+        $client = static::createClient();
 
+        //Torna codi 200 si tot és correcte
+        $response = $client->request('PUT', '/songs/5', [
+                "headers" => ["Accept: application/json"],
+                "json" => [
+                    "title" => "Incidunt voluptatibus non.",
+                    "duration" => 489,
+                    "album" => 1
+                ]
+            ]
+        );
+
+        $responseData = $response->toArray();
+
+        if ($response->getStatusCode() === 200) {
+            // 200 (èxit)
+            $this->assertArrayHasKey('response', $responseData);
+            $this->assertArrayHasKey('status', $responseData['response']);
+            $this->assertSame('success', $responseData['response']['status']);
+            $this->assertArrayHasKey('data', $responseData['response']);
+            $this->assertArrayHasKey('message', $responseData['response']);
+            $this->assertSame("La cançò s'ha actualitzat correctament!", $responseData['response']['message']);
+            $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+        } elseif ($response->getStatusCode() === 400) {
+            // 400 (error)
+            $this->assertArrayHasKey('response', $responseData);
+            $this->assertArrayHasKey('status', $responseData['response']);
+            $this->assertSame('error', $responseData['response']['status']);
+            $this->assertArrayHasKey('data', $responseData['response']);
+            $this->assertArrayHasKey('message', $responseData['response']);
+            $this->assertSame("Error al editar la cançò: ", $responseData['response']['message']);
+            $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+        } elseif ($response->getStatusCode() === 404) {
+            //404 (no trobat)
+            $this->assertArrayHasKey('response', $responseData);
+            $this->assertArrayHasKey('status', $responseData['response']);
+            $this->assertSame('error', $responseData['response']['status']);
+            $this->assertArrayHasKey('data', $responseData['response']);
+            $this->assertArrayHasKey('message', $responseData['response']);
+            $this->assertSame('ID de la cançó no trobat.', $responseData['response']['message']);
+            $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+        } else {
+            $this->fail("Codi d'estat no esperat" . $response->getStatusCode());
+        }
+    }
+
+    public function testDeleteSong() :void
+    {
+        $client = static::createClient();
+
+        // Prova d'eliminar una cançó existent
+        $response = $client->request('GET', '/songs/3', ["headers" => ["Accept: application/json"]]);
+
+        $responseData = $response->toArray();
+        $this->assertArrayHasKey('response', $responseData);
+        $this->assertArrayHasKey('status', $responseData['response']);
+        $this->assertSame('success', $responseData['response']['status']);
+        $this->assertArrayHasKey('data', $responseData['response']);
+        $this->assertArrayHasKey('message', $responseData['response']);
+        $this->assertSame("La cançó s'ha eliminat!", $responseData['response']['message']);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+
+
+        // Prova d'eliminar una cançó que no existeix
+        $client->request('DELETE', '/songs/999');
+        $this->assertArrayHasKey('response', $responseData);
+        $this->assertArrayHasKey('status', $responseData['response']);
+        $this->assertSame('error', $responseData['response']['status']);
+        $this->assertArrayHasKey('data', $responseData['response']);
+        $this->assertArrayHasKey('message', $responseData['response']);
+        $this->assertSame("Error al borrar una cançò:", $responseData['response']['message']);
+        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+
+    }
 }
