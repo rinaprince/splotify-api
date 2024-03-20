@@ -117,7 +117,7 @@ class ApiSongTest extends ApiTestCase
             "headers" => ["Accept: application/json"],
             "json" => [
                 "title" => "Eligendi et ut.",
-                "duration" => "121",
+                "duration" => 121,
                 "album" => 1
                 ]
             ]
@@ -141,7 +141,7 @@ class ApiSongTest extends ApiTestCase
             "headers" => ["Accept" => "application/json"],
             "json" => [
                 "title" => "Invalid song",
-                "duration" => "999",
+                "duration" => 999,
                 "album" => 1
             ]
         ]);
