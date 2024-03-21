@@ -170,7 +170,7 @@ class ApiSongTest extends ApiTestCase
     {
         $client = static::createClient();
 
-        $response = $client->request('PUT', '/songs/5', [
+        $response = $client->request('PUT', '/songs', [
             "headers" => ["Accept: application/json"],
             "json" => [
                 "title" => "Incidunt voluptatibus non.",
@@ -194,11 +194,13 @@ class ApiSongTest extends ApiTestCase
     {
         $client = static::createClient();
 
-        $response = $client->request('PUT', '/songs/5', [
+        $response = $client->request('PUT', '/songs', [
             "headers" => ["Accept: application/json"],
             "json" => [
-                // Dades incorrestes per provocar un error
-                "title" => "Invalid title"
+                // Dades incorrectes per provocar un error
+                "title" => "Miau",
+                "duration" => 999,
+                "album" => 999
             ]
         ]);
 
@@ -217,7 +219,7 @@ class ApiSongTest extends ApiTestCase
     {
         $client = static::createClient();
 
-        $response = $client->request('PUT', '/songs/nonexistent_id', [
+        $response = $client->request('PUT', '/songs', [
             "headers" => ["Accept: application/json"],
             "json" => [
                 // ID inexistent
@@ -240,7 +242,7 @@ class ApiSongTest extends ApiTestCase
     {
         $client = static::createClient();
 
-        $response = $client->request('PUT', '/songs/5', [
+        $response = $client->request('PUT', '/songs', [
             "headers" => ["Accept: application/json"],
             "json" => [
                 // Falta de dades per provocar un error
