@@ -108,7 +108,7 @@ class ApiSongTest extends ApiTestCase
 //        $this->assertArrayHasKey('message', $responseData);
 //        $this->assertEquals("No s'ha pogut trobar la cançò", $responseData['message']);
     }
-    function testCreateNewSongWithValidDataSucceed(): void
+    public function testCreateNewSongWithValidDataSucceed(): void
     {
         $client = static::createClient();
 
@@ -124,7 +124,7 @@ class ApiSongTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
     }
 
-    function testCreateNewSongWithNoDataFails(): void
+    public function testCreateNewSongWithNoDataFails(): void
     {
         $client = static::createClient();
 
@@ -136,7 +136,7 @@ class ApiSongTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
 
-    function testCreateNewSongWithIncompleteDataFails(): void
+    public function testCreateNewSongWithIncompleteDataFails(): void
     {
         $client = static::createClient();
 
@@ -150,7 +150,7 @@ class ApiSongTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
 
-    function testCreateNewSongWithInvalidDataFails(): void
+    public function testCreateNewSongWithInvalidDataFails(): void
     {
         $client = static::createClient();
 
@@ -166,56 +166,101 @@ class ApiSongTest extends ApiTestCase
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
 
-    /*public function testEditSong() :void
+    public function testEditSongWithSuccess(): void
     {
         $client = static::createClient();
 
-        //Torna codi 200 si tot és correcte
         $response = $client->request('PUT', '/songs/5', [
-                "headers" => ["Accept: application/json"],
-                "json" => [
-                    "title" => "Incidunt voluptatibus non.",
-                    "duration" => 489,
-                    "album" => 1
-                ]
+            "headers" => ["Accept: application/json"],
+            "json" => [
+                "title" => "Incidunt voluptatibus non.",
+                "duration" => 489,
+                "album" => 1
             ]
-        );
+        ]);
 
         $responseData = $response->toArray();
 
-        if ($response->getStatusCode() === 200) {
-            // 200 (èxit)
-            $this->assertArrayHasKey('response', $responseData);
-            $this->assertArrayHasKey('status', $responseData['response']);
-            $this->assertSame('success', $responseData['response']['status']);
-            $this->assertArrayHasKey('data', $responseData['response']);
-            $this->assertArrayHasKey('message', $responseData['response']);
-            $this->assertSame("La cançò s'ha actualitzat correctament!", $responseData['response']['message']);
-            $this->assertResponseStatusCodeSame(Response::HTTP_OK);
-        } elseif ($response->getStatusCode() === 400) {
-            // 400 (error)
-            $this->assertArrayHasKey('response', $responseData);
-            $this->assertArrayHasKey('status', $responseData['response']);
-            $this->assertSame('error', $responseData['response']['status']);
-            $this->assertArrayHasKey('data', $responseData['response']);
-            $this->assertArrayHasKey('message', $responseData['response']);
-            $this->assertSame("Error al editar la cançò: ", $responseData['response']['message']);
-            $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
-        } elseif ($response->getStatusCode() === 404) {
-            //404 (no trobat)
-            $this->assertArrayHasKey('response', $responseData);
-            $this->assertArrayHasKey('status', $responseData['response']);
-            $this->assertSame('error', $responseData['response']['status']);
-            $this->assertArrayHasKey('data', $responseData['response']);
-            $this->assertArrayHasKey('message', $responseData['response']);
-            $this->assertSame('ID de la cançó no trobat.', $responseData['response']['message']);
-            $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
-        } else {
-            $this->fail("Codi d'estat no esperat" . $response->getStatusCode());
-        }
+        $this->assertArrayHasKey('response', $responseData);
+        $this->assertArrayHasKey('status', $responseData['response']);
+        $this->assertSame('success', $responseData['response']['status']);
+        $this->assertArrayHasKey('data', $responseData['response']);
+        $this->assertArrayHasKey('message', $responseData['response']);
+        $this->assertSame("La cançò s'ha actualitzat correctament!", $responseData['response']['message']);
+        $this->assertResponseStatusCodeSame(Response::HTTP_OK);
     }
 
-    public function testDeleteSong() :void
+    public function testEditSongWithError(): void
+    {
+        $client = static::createClient();
+
+        $response = $client->request('PUT', '/songs/5', [
+            "headers" => ["Accept: application/json"],
+            "json" => [
+                // Dades incorrestes per provocar un error
+                "title" => "Invalid title"
+            ]
+        ]);
+
+        $responseData = $response->toArray();
+
+        $this->assertArrayHasKey('response', $responseData);
+        $this->assertArrayHasKey('status', $responseData['response']);
+        $this->assertSame('error', $responseData['response']['status']);
+        $this->assertArrayHasKey('data', $responseData['response']);
+        $this->assertArrayHasKey('message', $responseData['response']);
+        $this->assertSame("Error al editar la cançò: Dades invàlides o incompletes.", $responseData['response']['message']);
+        $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+    }
+
+    public function testEditSongWithNotFound(): void
+    {
+        $client = static::createClient();
+
+        $response = $client->request('PUT', '/songs/nonexistent_id', [
+            "headers" => ["Accept: application/json"],
+            "json" => [
+                // ID inexistent
+            ]
+        ]);
+
+        $responseData = $response->toArray();
+
+        $this->assertArrayHasKey('response', $responseData);
+        $this->assertArrayHasKey('status', $responseData['response']);
+        $this->assertSame('error', $responseData['response']['status']);
+        $this->assertArrayHasKey('data', $responseData['response']);
+        $this->assertArrayHasKey('message', $responseData['response']);
+        $this->assertSame('ID de la cançó no trobat.', $responseData['response']['message']);
+        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+    }
+
+
+    public function testEditSongWithIncompleteDataFails(): void
+    {
+        $client = static::createClient();
+
+        $response = $client->request('PUT', '/songs/5', [
+            "headers" => ["Accept: application/json"],
+            "json" => [
+                // Falta de dades per provocar un error
+                "title" => "Incomplete title"
+            ]
+        ]);
+
+        /*$responseData = $response->toArray();
+
+        $this->assertArrayHasKey('response', $responseData);
+        $this->assertArrayHasKey('status', $responseData['response']);
+        $this->assertSame('error', $responseData['response']['status']);
+        $this->assertArrayHasKey('data', $responseData['response']);
+        $this->assertArrayHasKey('message', $responseData['response']);
+        $this->assertSame("Error al editar la cançò: ", $responseData['response']['message']);*/
+        $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+    }
+
+
+    /*public function testDeleteSong() :void
     {
         $client = static::createClient();
 
