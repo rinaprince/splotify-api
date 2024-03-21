@@ -149,9 +149,6 @@ class SongsController extends AbstractController
     {
 
         try {
-            $entityManager->remove($song);
-            $entityManager->flush();
-
             $response = [ "response" => [
                 "status" => "success",
                 "data" => $song,
@@ -164,10 +161,13 @@ class SongsController extends AbstractController
             $response = [ "response" => [
                 "status" => "error",
                 "data" => null,
-                "message" => 'Error al borrar una cançò: ' . $e->getMessage()
+                "message" => "Error al borrar una cançò: " . $e->getMessage()
                 ]
             ];
-            return new JsonResponse($response, Response::HTTP_INTERNAL_SERVER_ERROR);
+            $entityManager->remove($song);
+            $entityManager->flush();
+
+            return new JsonResponse($response, Response::HTTP_NOT_FOUND);
         }
     }
 

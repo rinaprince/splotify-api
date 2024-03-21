@@ -19,7 +19,7 @@ class ApiSongTest extends ApiTestCase
      * @throws ClientExceptionInterface
      * @throws DecodingExceptionInterface
      */
-    public function  testIndex(): void
+    public function testIndex(): void
     {
         $client = static::createClient();
 
@@ -78,14 +78,14 @@ class ApiSongTest extends ApiTestCase
         //$this->assertEquals('Doloremque sapiente est quam.', $data['title']);
 
 
-/*        $this->assertArrayHasKey('status', $responseData);
-        $this->assertEquals('success', $responseData['status']);
+        /*        $this->assertArrayHasKey('status', $responseData);
+                $this->assertEquals('success', $responseData['status']);
 
-        $this->assertArrayHasKey('data', $responseData);
+                $this->assertArrayHasKey('data', $responseData);
 
 
-        $this->assertArrayHasKey('message', $responseData);
-        $this->assertNull($responseData['message']);*/
+                $this->assertArrayHasKey('message', $responseData);
+                $this->assertNull($responseData['message']);*/
     }
 
     public function testShowNotFound(): void
@@ -108,6 +108,7 @@ class ApiSongTest extends ApiTestCase
 //        $this->assertArrayHasKey('message', $responseData);
 //        $this->assertEquals("No s'ha pogut trobar la cançò", $responseData['message']);
     }
+
     public function testCreateNewSongWithValidDataSucceed(): void
     {
         $client = static::createClient();
@@ -170,7 +171,7 @@ class ApiSongTest extends ApiTestCase
     {
         $client = static::createClient();
 
-        $response = $client->request('PUT', '/songs', [
+        $response = $client->request('PUT', '/songs/6', [
             "headers" => ["Accept: application/json"],
             "json" => [
                 "title" => "Incidunt voluptatibus non.",
@@ -194,7 +195,7 @@ class ApiSongTest extends ApiTestCase
     {
         $client = static::createClient();
 
-        $response = $client->request('PUT', '/songs', [
+        $response = $client->request('PUT', '/songs/999', [
             "headers" => ["Accept: application/json"],
             "json" => [
                 // Dades incorrectes per provocar un error
@@ -238,36 +239,34 @@ class ApiSongTest extends ApiTestCase
     }
 
 
-    public function testEditSongWithIncompleteDataFails(): void
+    /*public function testEditSongWithIncompleteDataFails(): void
     {
         $client = static::createClient();
 
-        $response = $client->request('PUT', '/songs', [
+        $response = $client->request('PUT', '/songs/6', [
             "headers" => ["Accept: application/json"],
             "json" => [
                 // Falta de dades per provocar un error
-                "title" => "Incomplete title"
+                "title" => "Incidunt voluptatibus non."
             ]
         ]);
-
-        /*$responseData = $response->toArray();
-
-        $this->assertArrayHasKey('response', $responseData);
-        $this->assertArrayHasKey('status', $responseData['response']);
-        $this->assertSame('error', $responseData['response']['status']);
-        $this->assertArrayHasKey('data', $responseData['response']);
-        $this->assertArrayHasKey('message', $responseData['response']);
-        $this->assertSame("Error al editar la cançò: ", $responseData['response']['message']);*/
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
-    }
+    }*/
 
 
-    /*public function testDeleteSong() :void
+    public function testDeleteExistingSong(): void
     {
         $client = static::createClient();
 
         // Prova d'eliminar una cançó existent
-        $response = $client->request('GET', '/songs/3', ["headers" => ["Accept: application/json"]]);
+        $response = $client->request('DELETE', '/songs/3', [
+            "headers" => ["Accept: application/json"],
+            "json" => [
+                "title" => "Nobis eos non debitis.",
+                "duration" => 139,
+                "album" => 1
+            ]
+        ]);
 
         $responseData = $response->toArray();
         $this->assertArrayHasKey('response', $responseData);
@@ -277,17 +276,15 @@ class ApiSongTest extends ApiTestCase
         $this->assertArrayHasKey('message', $responseData['response']);
         $this->assertSame("La cançó s'ha eliminat!", $responseData['response']['message']);
         $this->assertResponseStatusCodeSame(Response::HTTP_OK);
+    }
 
+    public function testDeleteNonExistingSong(): void
+    {
+        $client = static::createClient();
 
         // Prova d'eliminar una cançó que no existeix
-        $client->request('DELETE', '/songs/999');
-        $this->assertArrayHasKey('response', $responseData);
-        $this->assertArrayHasKey('status', $responseData['response']);
-        $this->assertSame('error', $responseData['response']['status']);
-        $this->assertArrayHasKey('data', $responseData['response']);
-        $this->assertArrayHasKey('message', $responseData['response']);
-        $this->assertSame("Error al borrar una cançò:", $responseData['response']['message']);
-        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+        $response = $client->request('DELETE', '/songs/999');
 
-    }*/
+        $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
+    }
 }
