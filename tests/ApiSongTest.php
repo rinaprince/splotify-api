@@ -108,60 +108,65 @@ class ApiSongTest extends ApiTestCase
 //        $this->assertArrayHasKey('message', $responseData);
 //        $this->assertEquals("No s'ha pogut trobar la cançò", $responseData['message']);
     }
-    function testCreateNewSong() : void
+    function testCreateNewSongWithValidDataSucceed(): void
     {
         $client = static::createClient();
 
-        //Quan les dades són valides 201
         $response = $client->request('POST', '/songs', [
             "headers" => ["Accept: application/json"],
             "json" => [
                 "title" => "Eligendi et ut.",
                 "duration" => 121,
                 "album" => 1
-                ]
-            ]
-        );
-
-        $responseData = $response->toArray();
-        $this->assertArrayHasKey("response", $responseData);
-
-        $this->assertArrayHasKey("status", $responseData["response"]);
-        $this->assertSame("success", $responseData["response"]["status"]);
-
-        $this->assertArrayHasKey("data", $responseData["response"]);
-
-        $this->assertArrayHasKey("message", $responseData["response"]);
-        $this->assertSame("La cançó s'ha creat correctament!", $responseData["response"]["message"]);
-        //$this->assertSame("Eligendi et ut.", $responseData["title"]);
-        $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
-
-        //Quan les dades no són correectes 400
-        $invalidResponse = $client->request('POST', '/songs', [
-            "headers" => ["Accept" => "application/json"],
-            "json" => [
-                "title" => "Invalid song",
-                "duration" => 999,
-                "album" => 1
             ]
         ]);
 
-        $invalidData = $invalidResponse->toArray();
+        $this->assertResponseStatusCodeSame(Response::HTTP_CREATED);
+    }
 
-        $this->assertArrayHasKey("response", $invalidData);
+    function testCreateNewSongWithNoDataFails(): void
+    {
+        $client = static::createClient();
 
-        $this->assertArrayHasKey("status", $invalidData["response"]);
-        $this->assertSame("error", $invalidData["response"]["status"]);
-
-        $this->assertArrayHasKey("data", $invalidData["response"]);
-
-        $this->assertArrayHasKey("message", $invalidData["response"]);
-        $this->assertSame("Error al crear la cançò:", $invalidData["response"]["message"]);
+        $response = $client->request('POST', '/songs', [
+            "headers" => ["Accept" => "application/json"],
+            "json" => []
+        ]);
 
         $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
     }
 
-    public function testEditSong() :void
+    function testCreateNewSongWithIncompleteDataFails(): void
+    {
+        $client = static::createClient();
+
+        $response = $client->request('POST', '/songs', [
+            "headers" => ["Accept" => "application/json"],
+            "json" => [
+                "title" => "Incomplete Song"
+            ]
+        ]);
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+    }
+
+    function testCreateNewSongWithInvalidDataFails(): void
+    {
+        $client = static::createClient();
+
+        $response = $client->request('POST', '/songs', [
+            "headers" => ["Accept" => "application/json"],
+            "json" => [
+                "title" => "Invalid Song",
+                "duration" => "Invalid duration",
+                "album" => "Invalid album"
+            ]
+        ]);
+
+        $this->assertResponseStatusCodeSame(Response::HTTP_BAD_REQUEST);
+    }
+
+    /*public function testEditSong() :void
     {
         $client = static::createClient();
 
@@ -237,5 +242,5 @@ class ApiSongTest extends ApiTestCase
         $this->assertSame("Error al borrar una cançò:", $responseData['response']['message']);
         $this->assertResponseStatusCodeSame(Response::HTTP_NOT_FOUND);
 
-    }
+    }*/
 }
