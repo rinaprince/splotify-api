@@ -123,7 +123,7 @@ class SongsController extends AbstractController
             }
 
             $entityManager->persist($song);
-            $entityManager->persist($album);
+            //$entityManager->persist($album);
             $entityManager->flush();
 
             $responseData = ["response" => [
@@ -149,6 +149,10 @@ class SongsController extends AbstractController
     {
 
         try {
+
+            $entityManager->remove($song);
+            $entityManager->flush();
+
             $response = [ "response" => [
                 "status" => "success",
                 "data" => $song,
@@ -164,16 +168,30 @@ class SongsController extends AbstractController
                 "message" => "Error al borrar una cançò: " . $e->getMessage()
                 ]
             ];
-            $entityManager->remove($song);
-            $entityManager->flush();
 
             return new JsonResponse($response, Response::HTTP_NOT_FOUND);
         }
     }
 
-    public function edit(Song $song, Request $request, EntityManagerInterface $entityManager): JsonResponse
+    #[Route('/{id}', name: 'app_api_songs_update', methods: ['PUT'])]
+
+    public function edit(int $id, Request $request, SongRepository $songRepository,
+                         EntityManagerInterface $entityManager): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
+        $song = $songRepository->find($id);
+
+        if (null == $song) {
+            $response = [
+                "response" => [
+                    "status" => "error",
+                    "data" => null,
+                    "message" => "No existeix la cançò amb id ($id)"
+                ]
+            ];
+            return new JsonResponse($response, Response::HTTP_NOT_FOUND);
+        }
+
+        $data = $request->toArray();
 
         try {
             if (isset($data["title"])) {
@@ -202,7 +220,7 @@ class SongsController extends AbstractController
                         "album" => $song->getAlbum()->getId(),
                         "duration" => $song->getDuration()
                     ],
-                    "message" => "La cançò s'ha actualitzat correctament!."
+                    "message" => "La cançò s'ha actualitzat correctament!"
                 ]
             ];
 
